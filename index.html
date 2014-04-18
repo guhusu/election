@@ -242,7 +242,7 @@ function boardupdate()
 			  success: function(results) {
 			    //alert("Successfully retrieved " + results.length + " scores.");
 			    // Do something with the returned Parse.Object values
-			    alert(results.length);
+			    //alert(results.length);
 			    for (var i = 0; i < results.length; i++) { 
 			      var object = results[i];//alert(results[i].get('createdAt')+' -- '+results[i].get('updatedAt'));
 			      $('#board_msg').append('<div class="borad-msg"><div style="color:#f1da36;">'+results[i].get("name")+'：</div><div>'+results[i].get("note")+'</div><div align="right" style="font-size:12px;">'+RMC.parse_date(results[i].createdAt)+'</div></div>');
@@ -250,7 +250,7 @@ function boardupdate()
 			      //alert(results[i].id+' -- '+results[i].get('title'));
 			      //$('#newsdata').append('<li><img src="images/arrow.png" style="vertical-align: middle;"/> '+results[i].get('title')+'</li>');
 			    }
-			    alert(typeof(results[0].createdAt));
+			    //alert(typeof(results[0].createdAt));
 			    if(typeof(results[0].createdAt)!=undefined){
 			    	localStorage['board_update']=results[results.length-1].createdAt;
 			    }
