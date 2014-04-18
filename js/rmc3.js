@@ -43,6 +43,7 @@ var RMC={
 		_NOWID:'',//現在使用的ID
 		_PAGE_STORE:[],//頁的紀錄
 		_CORDOVA_STATUS:false,//cordova status
+		_CORDOVA_RUNDA:[],//cordova好了之後，執行的function
 		_PAGE_EVENT:{'hidebefore':{},'hide':{},'showbefore':{},'show':{},'showone':{},'hideone':{},'hidebeforeone':{},'showbeforeone':{}},//事件 
 		_RUNING:false,//動畫移動中
 		_TMP:'',//暫存
@@ -474,6 +475,15 @@ var RMC={
 		deviceReady:function(){
 			RMC._CORDOVA_STATUS=true;
 			document.addEventListener("backbutton", RMC.backDown, false);
+			//alert(RMC._CORDOVA_RUNDA);
+			for(var i in RMC._CORDOVA_RUNDA){
+				//alert(RMC._CORDOVA_RUNDA[i]);
+				eval(RMC._CORDOVA_RUNDA[i]+'();');
+			}
+		},
+		//設定cordova 開始時執行的函式
+		add_event_cordova:function(fun){
+			this._CORDOVA_RUNDA.push(fun);
 		},
 		//執行back按鈕時
 		backDown:function(){
@@ -910,6 +920,45 @@ var RMC={
 		//關閉跳出訊息
 		hideDigtal:function(){
 			$('#qroverlay').css('display','none');
+		},
+		//設定page-load
+		setPageLoad:function(){
+			var pl=Math.floor((RMC._SW-64)/2);
+			var pt=Math.floor((RMC._SH-64)/2);
+			if(!document.getElementById('page-loading')){
+				$('body').prepend('<div id="page-loading" style="position:absolute;background:rgba(0,0,0,0.7);width:'+RMC._SW+'px;height:'+RMC._SH+'px;z-index:40;display:none;"><img src="img/load.gif" style="margin-left:'+pl+'px;margin-top:'+pt+'px;" /></div>');
+			}
+			$('#page-loading').css('display','');
+		},
+		hidePageLoad:function(){
+			$('#page-loading').css('display','none');
+		},
+		//parse時間轉換
+		parse_date:function(dd){
+			var nd = new Date(dd);
+			var yy=nd.getFullYear();
+			var mm=nd.getMonth();
+			var dd=nd.getDate();
+			var hh=nd.getHours();
+			var hm=nd.getMinutes();
+			var d=yy+'-'+mm+'-'+dd+' '+hh+':'+hm;
+			
+			return d;
+		},
+		//檢查輸入值
+		check_value:function(value,type){
+			var ckstr='';
+			switch(type)
+			{
+				case 'mail':
+					re = new RegExp(/^(([0-9a-zA-Z_.]+)|([0-9a-zA-Z]+[_.0-9a-zA-Z-]*[0-9a-zA-Z_.]+))@([a-zA-Z0-9-]+[.])+([a-zA-Z]{2}|net|NET|com|COM|gov|GOV|mil|MIL|org|ORG|edu|EDU|int|INT|biz|BIZ|idv|IDV|cc|CC)$/);
+	                ckstr=re.test(value); 
+					break;
+				default:
+					break;
+			}
+			
+			return ckstr;
 		}
 };
 //cordova 參數

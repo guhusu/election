@@ -6,34 +6,76 @@
 <title>RMC</title>
 <link href="css/rmc3.css" rel="stylesheet" type="text/css" />
 <!--add_script-->
+<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/jquery.touchswipe.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/iscroll.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/parse-1.2.18.min.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/rmc3.js"></script>
+<script type="text/javascript"src="http://maps.google.com/maps/api/js?sensor=true" ></script>
 <style>
 .indexbg {
-	background:url(images/bg.png) center center;
+	/*background:url(images/initbg.png) center center;
 	background-size:cover;
+	-webkit-background-size:cover;*/
 }
-.about_us-bg {background:#eee;}
-.gallery-bg {background:#eee;}
-.contact_us-bg {background:#eee;}
+.forms-bg {background:#fff;}
+.gps-bg {background:#eee;}
+.video-bg {background:#eee;}
 .alink-bg {background:#eee;}
-.qr-bg {background:#eee;}
-.about_us-item-bg {background:#eee;}
-.gallery-item-bg {background:#eee;}
-.contact_us-item-bg {background:#eee;}
+.tel-bg {background:#eee;}
+.news-bg {background:#eee;}
+.board-bg {background:#fff;}
+.forms-item-bg {background:#eee;}
+.gps-item-bg {background:#eee;}
+.video-item-bg {background:#eee;}
 .alink-item-bg {background:#eee;}
-.qr-item-bg {background:#eee;}
-.about_us-color {}
-.gallery-color {}
-.contact_us-color {}
+.tel-item-bg {background:#eee;}
+.news-item-bg {background:#eee;}
+.board-item-bg {background:#eee;}
+.forms-color {}
+.gps-color {}
+.video-color {}
 .alink-color {}
-.qr-color {}
+.tel-color {}
+.news-color {}
+.board-color {}
 </style>
 <script>
 RMC.init(function(){
-	RMC.setGallery('gallery');
+	//RMC.setGallery('gallery');
+	Parse.initialize("o8t5y3kN4G8WgshKbbPl2r6uxjPcKQkDajEs06Sm", "apisGUJoceHJUWsBTES6O0Yryl2H6CSRr41SpOOd");
+	setTimeout(function(){
+		//首頁調整
+		var h=$('#main_top').height();
+		var h2=$('#initimg').height();//alert(h+' -- '+h2);
+		if(h>h2){
+			$('#main_top').css('height',h2+'px');
+			h=h2;
+		}
+		var sh=RMC._SH-h;
+		//alert(sh);alert(RMC._SH);
+		$('#main_bottom').css({height:sh+'px'});
+		var nsh=Math.floor(sh/3);//alert(nsh);
+		$('.index-nav-3 a').css({'height':nsh+'px'});
+		var imgh=nsh-20;
+		if(imgh>200) imgh=200;
+		var mar=Math.floor((nsh-imgh)/2);
+		if(mar<1) mar=0;
+		$('.index-nav-3 img').css({'height':imgh+'px','margin-top':mar+'px'});
+	},500);
+	
+	//調整btn大小
+	//var ww=RMC._SW-40;
+	//$('.show_button').css('width',ww+'px');
+	/*$.post( "http://laevateinn.myftp.biz/embedded_test/test.php", { time: "2014-04-16 17:02:03" ,item:'數位玩家測試商品',quantity:1}, function( data ) {
+		  alert(data);
+		}, "text");*/
+	//設定影片高度
+	var ww=RMC._SW;
+	ww=parseInt(ww/4*3);
+	$('#youtube_player').attr('height',ww);	
+	
 });
 function inbrow(url)
 {
@@ -50,23 +92,717 @@ function inbrow(url)
 		}
 	}
 }
+RMC.add_event('showone','news','newsshow');
+RMC.add_event('show','news','parsenews');
+function newsshow()
+{
+	//公告調整
+	var h=$('#news_h_d').height();
+	var h2=$('#news_h_img').height();//alert(h+' -- '+h2);
+	if(h>h2){
+		$('#news_h_d').css('height',h2+'px');
+		h=h2;
+	}//alert($('#news .header').outerHeight(true));
+	//h=$('#news .header').outerHeight(true);
+	//h2=$('#news .footer').outerHeight(true);alert(h+' -- '+h2);
+	h=RMC._SH-130;
+	$('#news .content').css('height',h+'px');
+}
+function ch_news(type)
+{
+	$('.nyes').removeClass('nyes');
+	if(type==1){
+		$('.news-h-t').addClass('nyes');
+		$('#newstype1').css('display','');
+		$('#newstype2').css('display','none');
+	}else{
+		$('.news-h-t2').addClass('nyes');
+		$('#newstype1').css('display','none');
+		$('#newstype2').css('display','');
+	}
+}
+function parsenews()
+{//alert('cc');
+	//Parse.initialize("o8t5y3kN4G8WgshKbbPl2r6uxjPcKQkDajEs06Sm", "apisGUJoceHJUWsBTES6O0Yryl2H6CSRr41SpOOd");
+	$('#newsdata').html('');
+	var GameScore = Parse.Object.extend("news");
+	var query = new Parse.Query(GameScore);
+	query.limit(30);//限制筆數
+	//query.addDescending('createdAt');//排序 desc
+	query.descending('createdAt');
+	//query.equalTo("playerName", "Dan Stemkoski");
+	query.find({
+	  success: function(results) {
+	    alert("Successfully retrieved " + results.length + " scores.");
+	    // Do something with the returned Parse.Object values
+	    for (var i = 0; i < results.length; i++) { 
+	      var object = results[i];
+	      //alert(object.id + ' - ' + object.get('title'));
+	      //alert(results[i].id+' -- '+results[i].get('title'));
+	      $('#newsdata').append('<li><img src="images/arrow.png" style="vertical-align: middle;"/> '+results[i].get('title')+'</li>');
+	    }
+	  },
+	  error: function(error) {
+	    alert("Error: " + error.code + " " + error.message);
+	  }
+	});	
+}
+function setHeight(obj) 
+{
+    obj.style.height = obj.scrollHeight + 'px';
+}
+//寫入資料
+function write_board()
+{
+	RMC.setPageLoad();
+	var vd={};
+	vd['board_name']=$.trim($('#board_name').val());
+	vd['board_note']=$.trim($('#board_note').val());
+	if(vd['board_name']=='' && vd['board_name']!='請輸入名稱'){
+		RMC.alert('名稱錯誤','資料填寫錯誤','確定');
+		return false;
+	}
+	if(vd['board_note']=='' && vd['board_name']!='請輸入內容'){
+		RMC.alert('內容錯誤','資料填寫錯誤','確定');
+		return false;
+	}
+	
+	var GameScore = Parse.Object.extend("board");
+	var gameScore = new GameScore();
+	 
+	gameScore.set("name", vd['board_name']);
+	gameScore.set("note", vd['board_note']);
+	 
+	gameScore.save(null, {
+	  success: function(gameScore) {
+	    // Execute any logic that should take place after the object is saved.
+	    //alert('New object created with objectId: ' + gameScore.id);
+	    RMC.hidePageLoad();
+	    RMC.backpage();
+	  },
+	  error: function(gameScore, error) {
+	    // Execute any logic that should take place if the save fails.
+	    // error is a Parse.Error with an error code and description.
+	    //alert('Failed to create new object, with error code: ' + error.description);
+	    RMC.hidePageLoad();
+		  RMC.alert('資料寫入失敗!<br>請重新送傳送','資料填寫錯誤','確定');
+	  }
+	});
+}
+RMC.add_event('showone','board','boardshow');
+RMC.add_event('show','board','boardupdate');
+function boardshow()
+{
+	$('#board_msg').html('');
+	var GameScore = Parse.Object.extend("board");
+	var query = new Parse.Query(GameScore);
+	query.limit(30);//限制筆數
+	//query.addDescending('createdAt');//排序 desc
+	//query.descending('createdAt');
+	//query.equalTo("playerName", "Dan Stemkoski");
+	query.find({
+	  success: function(results) {
+	    //alert("Successfully retrieved " + results.length + " scores.");
+	    // Do something with the returned Parse.Object values
+	    for (var i = 0; i < results.length; i++) { 
+	      var object = results[i];//alert(results[i].get('createdAt')+' -- '+results[i].get('updatedAt'));
+	      $('#board_msg').append('<div class="borad-msg"><div style="color:#f1da36;">'+results[i].get("name")+'：</div><div>'+results[i].get("note")+'</div><div align="right" style="font-size:12px;">'+RMC.parse_date(results[i].createdAt)+'</div></div>');
+	      //alert(object.id + ' - ' + object.get('title'));
+	      //alert(results[i].id+' -- '+results[i].get('title'));
+	      //$('#newsdata').append('<li><img src="images/arrow.png" style="vertical-align: middle;"/> '+results[i].get('title')+'</li>');
+	    }
+	    //alert(typeof(results[0].createdAt));
+	    if(typeof(results[0].createdAt)!=undefined){
+	    	localStorage['board_update']=results[results.length-1].createdAt;
+	    }
+	  },
+	  error: function(error) {
+	    alert("Error: " + error.code + " " + error.message);
+	  }
+	});	
+}
+function boardupdate()
+{
+	if(localStorage['board_update']!=undefined && localStorage['board_update']!=''){
+		//alert(localStorage['board_update']);
+		var GameScore = Parse.Object.extend("board");
+		var query = new Parse.Query(GameScore);
+		//query.descending('createdAt');
+		//query.greaterThan('createdAt',localStorage['board_update']);
+		var nd=new Date(localStorage['board_update']);
+		//var minutes = nd.getMinutes();
+		var ss=nd.getSeconds();
+		nd.setSeconds(ss + 1);//alert(nd+"\n"+new Date(localStorage['board_update']));
+		//nd.setMinutes(minutes + 1);
+		//query.greaterThan('createdAt',new Date(localStorage['board_update']));
+		query.greaterThanOrEqualTo('createdAt',new Date(nd));
+		//alert(new Date(localStorage['board_update']));
+		//query.equalTo("name","4344");
+		query.find({
+			  success: function(results) {
+			    //alert("Successfully retrieved " + results.length + " scores.");
+			    // Do something with the returned Parse.Object values
+			    alert(results.length);
+			    for (var i = 0; i < results.length; i++) { 
+			      var object = results[i];//alert(results[i].get('createdAt')+' -- '+results[i].get('updatedAt'));
+			      $('#board_msg').append('<div class="borad-msg"><div style="color:#f1da36;">'+results[i].get("name")+'：</div><div>'+results[i].get("note")+'</div><div align="right" style="font-size:12px;">'+RMC.parse_date(results[i].createdAt)+'</div></div>');
+			      //alert(object.id + ' - ' + object.get('title'));
+			      //alert(results[i].id+' -- '+results[i].get('title'));
+			      //$('#newsdata').append('<li><img src="images/arrow.png" style="vertical-align: middle;"/> '+results[i].get('title')+'</li>');
+			    }
+			    alert(typeof(results[0].createdAt));
+			    if(typeof(results[0].createdAt)!=undefined){
+			    	localStorage['board_update']=results[results.length-1].createdAt;
+			    }
+			  },
+			  error: function(error) {
+			    alert("Error: " + error.code + " " + error.message);
+			  }
+			});	
+	}
+}
+function to_google_map(val)
+{
+	//sessionStorage['']
+	if(!sessionStorage){
+        alert('no support sessionStorage');
+    }else{
+    	var tmp=val.split('-|-');
+        sessionStorage.setItem("lbs_addr", tmp[1]);
+        sessionStorage.setItem("lbs_tel", tmp[0]);
+        sessionStorage.setItem("lbs_lat", tmp[2]);
+        sessionStorage.setItem("lbs_lng", tmp[3]);
+        sessionStorage.setItem("lbs_title", tmp[4]);
+    }
+
+	RMC.changepage('gps_area');
+}
+//寫入資料
+function send_email()
+{
+	RMC.setPageLoad();
+	var vd={};
+	vd['f_name']=$.trim($('#forms_p_name').val());
+	vd['f_note']=$.trim($('#forms_p_note').val());
+	vd['f_company']=$.trim($('#forms_p_compay').val());
+	vd['f_tel']=$.trim($('#forms_p_tel').val());
+	vd['f_fax']=$.trim($('#forms_p_fax').val());
+	vd['f_title']=$.trim($('#forms_p_title').val());
+	vd['f_email']=$.trim($('#forms_p_email').val());
+	vd['f_sex']=$('#forms_p_sex :checked').val();
+	if(vd['f_name']=='' && vd['f_name']!='請輸入聯絡人姓名'){
+		RMC.alert('聯絡人姓名錯誤','資料填寫錯誤','確定');
+		RMC.hidePageLoad();
+		return false;
+	}
+	if(vd['f_note']=='' && vd['f_note']!='請輸入內容說明'){
+		RMC.alert('內容說明錯誤','資料填寫錯誤','確定');
+		RMC.hidePageLoad();
+		return false;
+	}
+	if(vd['f_tel']=='' && vd['f_tel']!='請輸入聯絡電話'){
+		RMC.alert('聯絡電話錯誤','資料填寫錯誤','確定');
+		RMC.hidePageLoad();
+		return false;
+	}
+	if(vd['f_title']=='' && vd['f_title']!='請輸入主旨'){
+		RMC.alert('主旨錯誤','資料填寫錯誤','確定');
+		RMC.hidePageLoad();
+		return false;
+	}
+	if(vd['f_email']!='' && vd['f_email']!='請輸入電子信箱'){//alert(RMC.check_value(vd['f_email']));
+		if(!RMC.check_value(vd['f_email'],'mail')){
+			RMC.alert('電子信箱錯誤','資料填寫錯誤','確定');
+			RMC.hidePageLoad();
+			return false;
+		}
+	}
+	
+	var mailbody='<div style="width:600px;border:#ccc solid 1px;padding:20px;"><br>您好：<p>您有新的聯絡單</p>';
+	if(vd['f_company']!='') mailbody +='<div>公司名稱：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_company']+'</span></div>';
+	if(vd['f_name']!='') mailbody +='<div>聯絡人姓名：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_name']+'</span></div>';
+	if(vd['f_sex']!='') mailbody +='<div>性別：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_sex']+'</span></div>';
+	if(vd['f_tel']!='') mailbody +='<div>聯絡電話：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_tel']+'</span></div>';
+	if(vd['f_fax']!='') mailbody +='<div>傳真電話：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_fax']+'</span></div>';
+	if(vd['f_title']!='') mailbody +='<div>需求主旨：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_title']+'</span></div>';
+	if(vd['f_email']!='') mailbody +='<div>電子信箱：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_email']+'</span></div>';
+	if(vd['f_note']!='') mailbody +='<div>內容：<span style="font-size:16px;font-weight:bold;color:bule;">'+vd['f_note']+'</span></div>';
+	mailbody +='</div>';
+	
+	var fd = new FormData();
+	fd.append('email','rain@geekers.tw');
+	fd.append('mailbody',mailbody);
+	
+	var url='http://www.app4u.tw/app/election_mail';
+	var xhr = new XMLHttpRequest();
+	xhr.upload.addEventListener("progress", upload_progress, false);
+	xhr.addEventListener("load", app_mail_ok, false);
+	xhr.addEventListener("error", app_mail_error, false);
+	xhr.open("POST", url);  
+	xhr.send(fd);
+	
+		//election_mail
+	/*alert(RMC._CORDOVA_STATUS);
+	if(RMC._CORDOVA_STATUS){
+		alert('寄信');
+		
+		window.plugin.email.open({
+		    to:          ['rain@geekers.tw'], // email addresses for TO field
+		    //cc:          Array, // email addresses for CC field
+		    //bcc:         Array, // email addresses for BCC field
+		    //attachments: Array, // paths to the files you want to attach or base64 encoded data streams
+		    subject:    "app聯絡單", // subject of the email
+		    body:       mailbody, // email body (could be HTML code, in this case set isHtml to true)
+		    isHtml:    true, // indicats if the body is HTML or plain text
+		}, function(data){
+			alert('cccs');
+			alert(data);
+		}, this);
+	}*/
+}
+function upload_progress(){}
+function app_mail_error(e){RMC.hidePageLoad();alert('發送失敗!!');}
+function app_mail_ok(e)
+{
+	RMC.hidePageLoad();
+	if(e.target.responseText=='y'){
+		$('#forms_p_name').val('');
+		$('#forms_p_title').val('');
+		$('#forms_p_company').val('');
+		$('#forms_p_tel').val('');
+		$('#forms_p_fax').val('');
+		$('#forms_p_note').val('');
+		$('#forms_p_email').val('');
+		alert('發送完成!!');
+	}else{
+		alert('發送失敗!!');
+	}
+}
+RMC.add_event('hide','video','close_youtube');
+//run youtube
+function run_youtube(attr)
+{
+	$('#youtube_player').attr('src','http://www.youtube.com/embed/'+attr+'?rel=0&autoplay=1');
+	$('#video .content').scrollTop(0);
+}
+function close_youtube()
+{
+	$('#youtube_player').attr('src','');
+}
+
+RMC.add_event('show','gps_area','initialize');
+RMC.add_event('showone','gps_area','gpswh');
+var map;
+var infowindow = null;
+var site_data={};
+//var site_data={title:sessionStorage.getItem("lbs_title"),pict:"",tel:sessionStorage.getItem("lbs_tel"),addr:sessionStorage.getItem("lbs_addr"),lat:sessionStorage.getItem("lbs_lat"),lng:sessionStorage.getItem("lbs_lng"),header:""},viewport={width:$(window).width(),height:$(window).height()};
+var watchID = null;//cordova gps用
+var myTG=[];//cordova gps用
+var geocoder;//反查地址用
+var localaddress='';//反查地址用
+var directionsDisplay;//導航用
+var directionsService = new google.maps.DirectionsService();//導航用
+var MyMarker;
+/*document.addEventListener("deviceready", onDeviceReady, false);
+$(document).ready(function(){
+$('#vt').html(site_data.title);
+var h=$('#vh').outerHeight(true)+$('#vb').outerHeight(true);
+h=viewport.height-h;
+$('#map').css({height:h+'px',width:viewport.width+'px'});
+//120.328292 /22.651618
+initialize();
+});*/
+function gpswh()
+{
+	//設定map高度
+	var w=$('#gps_area .content').width();
+	var h=$('#gps_area .content').height();
+	$('#map').css({height:h+'px',width:w+'px'});
+}
+function initialize() {
+	
+	site_data={title:sessionStorage.getItem("lbs_title"),tel:sessionStorage.getItem("lbs_tel"),addr:sessionStorage.getItem("lbs_addr"),lat:sessionStorage.getItem("lbs_lat"),lng:sessionStorage.getItem("lbs_lng")};
+	geocoder = new google.maps.Geocoder();
+	var latlng = new google.maps.LatLng(site_data.lat, site_data.lng);
+	var myOptions = {
+		zoom : 16,
+		center : latlng,
+		mapTypeId : google.maps.MapTypeId.ROADMAP
+	};
+	map = new google.maps.Map(document.getElementById("map"), myOptions);
+	infowindow = new google.maps.InfoWindow({
+		content : "loading..."
+
+	});
+
+	setmarks();
+	directionsDisplay = new google.maps.DirectionsRenderer();
+	directionsDisplay.setMap(map);
+}
+	function setmarks() {
+		var image = 'images/location.png';
+		var myLatLng = new google.maps.LatLng(site_data.lat, site_data.lng);
+		var beachMarker = new google.maps.Marker({
+			position : myLatLng,
+			map : map,
+			icon : image,
+			title : site_data.title,
+			html : '地址: ' + site_data.addr
+			//html : '電話: ' + site_data.tel + '<br>地址: ' + site_data.addr
+		});
+		beachMarker.setAnimation(google.maps.Animation.DROP);
+
+		/*infowindow = new google.maps.InfoWindow({
+		 content: "loading..."
+
+		 });*/
+
+		google.maps.event.addListener(beachMarker, "click", function() {
+
+			infowindow.setContent(this.html);
+			infowindow.open(map, this);
+
+		});
+
+	}
+	function updatelocation() {
+		myTG = [ 22.666249, 120.30333599999994 ];//高雄巨蛋
+		setmymarks();
+		mylocation();
+
+	}
+	//設定我的位置圖片
+	function setmymarks() {
+		var image = "images/mylocation.png";
+		var myLatLng = new google.maps.LatLng(myTG[0], myTG[1]);
+		if (MyMarker)
+			MyMarker.setMap(null);
+		MyMarker = new google.maps.Marker({
+			position : myLatLng,
+			map : map,
+			icon : image
+		});
+
+		//取得反查地理編碼
+		var latlng = new google.maps.LatLng(myTG[0], myTG[1]);
+		geocoder.geocode({
+			'latLng' : latlng
+		}, function(results, status) {
+			if (status == google.maps.GeocoderStatus.OK) {
+				if (results[1]) {
+					//alert("end");
+					/*map.setZoom(11);
+					marker = new google.maps.Marker({
+					position: latlng,
+					map: map
+					});
+					infowindow.setContent(results[1].formatted_address);
+					infowindow.open(map, marker);*/
+					alert("地址為："+results[1].formatted_address);
+					localaddress = results[1].formatted_address;
+				}
+			} else {
+				//alert("Geocoder failed due to: " + status);
+			}
+		});
+	}
+	//顯示我位置
+	function mylocation() {
+		if (myTG[0] == undefined)
+			alert("無法取得您的位置,請確定有開啟GPS或網路");
+		else
+			map.setCenter(new google.maps.LatLng(myTG[0], myTG[1]));
+	}
+	//路線圖
+	function calcRoute() {
+		if (myTG[0] == undefined) {
+			alert("無法取得您的位置,請確定有開啟GPS和網路");
+			return false;
+		}
+		//var start=localaddress;
+		var start = new google.maps.LatLng(myTG[0], myTG[1]);
+		var end = site_data.addr;
+		//alert("start = "+start+' end ='+end);
+		//var start = document.getElementById("start").value;
+		//var end = document.getElementById("end").value;
+		var request = {
+			origin : start,
+			destination : end,
+			optimizeWaypoints : true,
+			travelMode : google.maps.TravelMode.DRIVING
+		};
+		directionsService.route(request, function(result, status) {
+			if (status == google.maps.DirectionsStatus.OK) {
+				directionsDisplay.setDirections(result);
+			}
+		});
+	}
+RMC.add_event_cordova('runGps');
+function runGps() {
+	var networkState = navigator.connection.type;
+	if (networkState.toLowerCase() == "none") {
+		alert("請開啟網路!!");
+	}
+	// Throw an error if no update is received every 30 seconds
+	var options = {
+		timeout : 30000
+	};
+	watchID = navigator.geolocation.watchPosition(onSuccess, onError,
+				options);
+}
+function onSuccess(position) {
+	myTG = [ position.coords.latitude, position.coords.longitude ];
+	setmymarks();
+	//alert(position.coords.latitude + ' -- ' + position.coords.longitude);
+		/* var element = document.getElementById('geolocation');
+		 element.innerHTML = 'Latitude: '  + position.coords.latitude  	+ '<br />' +
+		 'Longitude: ' + position.coords.longitude 	+ '<br />' +
+		 '<hr />'  	+ element.innerHTML;
+		
+		 var div = document.getElementById('myDiv');
+
+		 div.innerHTML = 'Latitude: '         	+ position.coords.latitude     	+ '<br/>' +
+		 'Longitude: '        	+ position.coords.longitude    	+ '<br/>' +
+		 'Altitude: '         	+ position.coords.altitude     	+ '<br/>' +
+		 'Accuracy: '         	+ position.coords.accuracy     	+ '<br/>' +
+		 'Altitude Accuracy: '	+ position.coords.altitudeAccuracy + '<br/>' +
+		 'Heading: '          	+ position.coords.heading      	+ '<br/>' +
+		 'Speed: '            	+ position.coords.speed        	+ '<br/>'; */
+}
+
+	// onError Callback receives a PositionError object
+	//
+function onError(error) {
+	//alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+}
 </script>
 </head>
 <body>
 <div id="pageoverlay"></div>
 <div class="page" id="main">
 <div class="content indexbg">
-<div align="center" style="margin-top:50px;"><!-- r_logo_start --><img src="images/tra.png" width="70%" /><!-- r_logo_end --></div>
-
+<div id="main_top" ><img src="images/bgtop.png" width="100%" id="initimg" border="0"  style/></div>
+<div id="main_bottom" style="padding:0px;margin:0px;background:url(images/bgbottom.png);background-size:cover;-webkit-background-size:cover;"><div class="index-nav-3">
+<li><a href="javascript:RMC.changepage('news');"><img src="images/001.png"  /></a></li>
+<li><a href="javascript:RMC.changepage('board');"><img src="images/002.png"  /></a></li>
+<li><a href="javascript:RMC.changepage('gps');"><img src="images/003.png"  /></a></li>
 </div>
-<div class="footer nav"><ul class="nav-5">
+<div class="index-nav-3">
+<li><a href="javascript:inbrow('https://www.facebook.com/conminkai');"><img src="images/004.png" /></a></li>
+<li><a href="javascript:RMC.changepage('video');"><img src="images/005.png" /></a></li>
+<li><a href="javascript:RMC.changepage('forms');"><img src="images/006.png" /></a></li>
+</div>
+<div class="index-nav-3">
+<li><a href="javascript:RMC.changepage('tel');"><img src="images/007.png" /></a></li>
+<li><a href=""><img src="images/008.png" /></a></li>
+<li><a href=""><img src="images/009.png" /></a></li>
+</div>
+<div style="clear:both;"></div>
+</div>
+</div>
+<!--div class="footer nav"><ul class="nav-5">
       <li><a href="javascript:RMC.changepage('about_us');"><img src="images/about_us.png" /><br>關於我們</a></li>
       <li><a href="javascript:RMC.changepage('contact_us');"><img src="images/contact_us.png" /><br>服務項目</a></li>
       <li><a href="javascript:RMC.changepage('gallery');"><img src="images/gallery.png" /><br>相&nbsp;&nbsp;簿</a></li>
       <li><a href="javascript:RMC.changepage('alink');"><img src="images/alink.png" /><br>連&nbsp;&nbsp;結</a></li>
       <li><a href="javascript:RMC.changepage('qr');"><img src="images/qr.png" /><br>電&nbsp;&nbsp;話</a></li>
+   </ul><div class="clear"></div></div-->
+</div>
+<!-- news_start -->
+<div class="page" id="news">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">政見公告</span>
+<ul class="news-h-nav">
+<li align="right"><a href="javascript:ch_news(1);"><span class="news-h-t nyes">參選政見</span></a></li>
+<li align="left"><a href="javascript:ch_news(2);"><span class="news-h-t2">最新公告</span></a></li>
+</ul><div class="clear"></div>
+</div>
+<div class="content news-bg news-color">
+<!-- news_cc_start -->
+<div id="newstype1">
+<div id="news_h_d"><img src="images/news-top.png" width="100%" id="news_h_img" /></div>
+<div class="listview-news">
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 提升議會問政品質─大力支持成立「台東公民監督聯盟」</li>
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 教育─拒絕校園霸凌、打破學區制打造特色學校、重視少子化問題。</li>
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 社福─拒絕家暴、促建婦幼館、促增青少年活動空間、促成實物銀行、推動地方型勸募、推動社會住宅。</li>
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 農業─推廣無毒產業、農業新移民、農業走出去。</li>
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 觀光─推展獨特生態觀光、推動台東好好玩計畫、推動小城市旅行計畫。</li>
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 城市未來發展─保留舊元素、規劃寶桑老街、停車問題、都市重劃、加速道路重整。</li>
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 推動公民論壇，讓市民的聲音被聽到。</li>
+</div>
+</div>
+<div id="newstype2" style="display:none;">
+<div class="listview-news" id="newsdata">
+<li><img src="images/arrow.png" style="vertical-align: middle;"/> 提升議會問政品質─大力支持成立「台東公民監督聯盟」</li>
+</div>
+</div>
+<!-- news_cc_end -->
+</div>
+<div class="footer news" >少年好牽教，服務最貼心</div>
+</div>
+<!-- news_end -->
+<!-- news_item_start -->
+<!-- news_item_end -->
+
+<!-- board_start -->
+<div class="page" id="board">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="r-area"><img src="css/images/w/board.png" class="pon" tap="RMC.changepage('board_write');" /></span><span class="header-namea">留言版</span></div>
+<div class="content board-bg board-color" style="padding:10px 10px 0px 10px;box-sizing: border-box;-webkit-box-sizing: border-box;">
+<!-- board_cc_start -->
+<div><img src="images/board-top.png" width="100%" /></div>
+<div id="board_msg">
+<div class="borad-msg">
+<div style="color:#f1da36;">貓貓：</div>
+<div>xasdfefasdijef</div>
+<div align="right" style="font-size:12px;">2014-10-10 12-12</div>
+</div>
+</div>
+<!-- board_cc_end -->
+</div>
+</div>
+<!-- board_end -->
+<!-- board_item_start -->
+<!-- board_item_end -->
+<div class="page" id="board_write">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">寫新留言</span></div>
+<div class="content board-bg board-color pad">
+<div style="box-sizing: border-box; -webkit-box-sizing: border-box;padding:20px;">
+<div style="margin-left:30px;">留 言 者 ：(字數限制16字)</div>
+<div style="text-align:center;"><input type="text" id="board_name" value="" class="news-input" style="width:80%" placeholder="請輸入名稱" required /></div>
+<div style="margin:10px 0px 10px 30px;">發表討論 ：(字數限制200字)</div>
+<div style="text-align:center;"><textarea class="news-textarea" style="width:80%;" id="board_note" onpropertychange="setHeight(this);" onmouseover="setHeight(this);" 
+onpaste="setHeight(this);" oninput="setHeight(this);" placeholder="請輸入內容" required></textarea></div>
+<div style="text-align:center;"><img src="images/brand.png" height="40" tap="write_board()"  /></div>
+</div>
+</div>
+</div>
+
+<!-- gps_start -->
+<div class="page" id="gps">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">地圖</span></div>
+<div class="content gps-bg gps-color">
+<!-- gps_cc_start -->
+<div class="listview">
+<li><a href="javascript:to_google_map('-|-台東縣台東市中華路二段173號-|-22.7445624-|-121.13861670000006-|-台灣安心家庭關懷協會');"><span class="list">台灣安心家庭關懷協會</span></a></li>
+<li><a href="javascript:to_google_map('-|-高雄火車站-|-22.63962-|-120.302111-|-火車站');"><span class="list">台灣安心家庭關懷協會</span></a></li>
+</div>
+<!-- gps_cc_end -->
+</div>
+</div>
+<!-- gps_end -->
+<!-- gps_item_start -->
+<!-- gps_item_end -->
+<div class="page" id="gps_area">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea"　id="gps_area_name">地圖</span></div>
+<div class="content gps-bg gps-color">
+<div id="map"></div>
+</div>
+<div class="footer nav"><ul class="nav-2">
+      <li><a href="javascript:calcRoute();"><img src="images/contact_us.png" /><br>路線圖</a></li>
+      <li><a href="javascript:mylocation();"><img src="images/about_us.png" /><br>我的位置</a></li>
    </ul><div class="clear"></div></div>
 </div>
+
+<!-- video_start -->
+<div class="page" id="video">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">影片</span></div>
+<div class="content video-bg video-color">
+<!-- video_cc_start -->
+<div>
+<iframe width="100%" id="youtube_player" src="http://www.youtube.com/embed/6rZKdLGUfFA?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+<div class="listview">
+<li class="padd"><a href="javascript:run_youtube('6rZKdLGUfFA');"><span class="listpict"><img src="images/video/1.jpg" width="50" /><span class="tx">南王國小2013歲末感恩活動樂團表演-快樂天堂</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('YRATE-N3f1I');"><span class="listpict"><img src="images/video/2.jpg" width="50" /><span class="tx">南王國小2013歲末感恩活動樂團表演-隱形的翅膀</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('s5xJOnCLAuU');"><span class="listpict"><img src="images/video/3.jpg" width="50" /><span class="tx">南王國小2013歲末感恩活動樂團表演-歡樂年華</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('UExh3xU_c5A');"><span class="listpict"><img src="images/video/4.jpg" width="50" /><span class="tx">2013南王國小年度回顧</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('O5LEi1tFEco');"><span class="listpict"><img src="images/video/5.jpg" width="50" /><span class="tx">隱形的翅膀</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('1MU1ZlFXKu4');"><span class="listpict"><img src="images/video/6.jpg" width="50" /><span class="tx">歡樂年華</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('7nSJA64GkXU');"><span class="listpict"><img src="images/video/7.jpg" width="50" /><span class="tx">2013南王部落阿拉巴蓋之南北對抗</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('D1qLvO7w3uY');"><span class="listpict"><img src="images/video/8.jpg" width="50" /><span class="tx">2013阿拉巴蓋</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('uI0u7IpLxUQ');"><span class="listpict"><img src="images/video/9.jpg" width="50" /><span class="tx">第三代的阿魯巴樂團^^-快樂天堂</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('Ih8_0ZGimSE');"><span class="listpict"><img src="images/video/10.jpg" width="50" /><span class="tx">南王國小2012年度回顧影片</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('ziiQuGpUffA');"><span class="listpict"><img src="images/video/11.jpg" width="50" /><span class="tx">台東地方法院尾牙表演-柏亨電吉他獨奏3</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('KqPhhM9yyTk');"><span class="listpict"><img src="images/video/12.jpg" width="50" /><span class="tx">台東地方法院尾牙表演-柏亨電吉他獨奏2</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('GMUxUtPlcoI');"><span class="listpict"><img src="images/video/13.jpg" width="50" /><span class="tx">台東地方法院尾牙表演-柏亨電吉他獨奏1</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('CSrGdAINzps');"><span class="listpict"><img src="images/video/14.jpg" width="50" /><span class="tx">台洪安蕎2歲時鬼靈精怪念唐詩</span></span></a></li>
+<li class="padd"><a href="javascript:run_youtube('Jl3OoKOHwok');"><span class="listpict"><img src="images/video/15.jpg" width="50" /><span class="tx">阿魯巴樂團2011創作曲-星期五先生(練團)</span></span></a></li>
+</div>
+<!-- video_cc_end -->
+</div>
+</div>
+<!-- video_end -->
+<!-- video_item_start -->
+<!-- video_item_end -->
+
+<!-- forms_start -->
+<div class="page" id="forms">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">表單傳送</span></div>
+<div class="content forms-bg forms-color">
+<!-- forms_cc_start -->
+<div style="box-sizing: border-box; -webkit-box-sizing: border-box;">
+<div class="forms-in-list">
+<div >公司名稱：</div>
+<div ><input type="text" id="forms_p_company" value="" class="forms-input" style="width:100%" placeholder="請輸入公司名稱"  /></div>
+</div>
+<div class="forms-in-list">
+<div >聯絡人姓名（必填）：</div>
+<div ><input type="text" id="forms_p_name" value="" class="forms-input" style="width:100%" placeholder="請輸入聯絡人姓名" required /></div>
+<div >性別：</div>
+<div>
+<span class="radio" id="forms_p_sex">
+<input type="radio" value="男" id="ra1" name="ra" checked /><label for="ra1">男</label><input type="radio" value="女" id="ra2" name="ra" /><label for="ra2">女</label>
+</span>
+</div>
+</div>
+<div class="forms-in-list">
+<div >聯絡電話（必填）：</div>
+<div ><input type="text" id="forms_p_tel" value="" class="forms-input" style="width:100%" placeholder="請輸入聯絡電話" required /></div>
+</div>
+<div class="forms-in-list">
+<div >傳真電話：</div>
+<div ><input type="text" id="forms_p_fax" value="" class="forms-input" style="width:100%" placeholder="請輸入傳真電話"  /></div>
+</div>
+<div class="forms-in-list">
+<div >需求主旨（必填）：</div>
+<div ><input type="text" id="forms_p_title" value="" class="forms-input" style="width:100%" placeholder="請輸入需求主旨" required /></div>
+</div>
+<div class="forms-in-list">
+<div >電子信箱：</div>
+<div ><input type="text" id="forms_p_email" value="" class="forms-input" style="width:100%" placeholder="請輸入電子信箱"  /></div>
+</div>
+<div class="forms-in-list">
+<div >內容說明(必填-請詳述) ：</div>
+<div ><textarea class="forms-textarea" style="width:100%;" id="forms_p_note" onpropertychange="setHeight(this);" onmouseover="setHeight(this);" 
+onpaste="setHeight(this);" oninput="setHeight(this);" placeholder="請輸入內容說明" required></textarea></div>
+</div>
+<div class="forms-in-list">
+<div><span class="show_button" tap="send_email()">送出資料</span></div>
+</div>
+</div>
+<!-- forms_cc_end -->
+</div>
+</div>
+<!-- forms_end -->
+<!-- forms_item_start -->
+<!-- forms_item_end -->
+
+<!-- tel_start -->
+<div class="page" id="tel">
+<div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">政見公告</span></div>
+<div class="content tel-bg tel-color">
+<!-- tel_cc_start -->
+<div class="listview">
+<li><a href="tel:089346732"><span class="listphone">市內電話<span class="numbers">089-346732</span></span></a></li>
+<li><a href="tel:0921004060"><span class="listphone">手機<span class="numbers">0921-004060</span></span></a></li>
+</div>
+<!-- tel_cc_end -->
+</div>
+</div>
+<!-- tel_end -->
+<!-- tel_item_start -->
+<!-- tel_item_end -->
+
+
 <!-- about_us_start -->
 <div class="page" id="about_us">
 <div class="header pad"><span class="l-area"><img src="css/images/w/back.png" class="pon" tap="RMC.backpage();"></span><span class="header-namea">關於我們</span></div>
